@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Invoice Dispatch Count · Mosaic Wellness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12151a;
+    --panel: #1b2028;
+    --panel-2: #21272f;
+    --line: #2b323c;
+    --accent: #ffb020;
+    --accent-soft: rgba(255, 176, 32, 0.12);
+    --good: #4cc38a;
+    --text: #e7eaee;
+    --text-dim: #93a0ac;
+    --text-faint: #5c6773;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 6%),
+      repeating-linear-gradient(180deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  .display { font-family: 'Barlow Condensed', sans-serif; }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  h1.display {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 0;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .scope-note {
+    color: var(--text-faint);
+    font-size: 12.5px;
+    margin-top: 8px;
+    max-width: 560px;
+    line-height: 1.5;
+  }
+
+  .status-block {
+    text-align: right;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: var(--good);
+    box-shadow: 0 0 0 3px rgba(76, 195, 138, 0.15);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot { animation: none; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .updated-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  #lastUpdated {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .refresh-btn {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .refresh-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- KPI strip ---------- */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--accent);
+    border-radius: 4px;
+    padding: 20px 22px;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: rise 0.5s ease forwards;
+  }
+  .kpi-card:nth-child(2) { animation-delay: 0.08s; border-top-color: var(--good); }
+  .kpi-card:nth-child(3) { animation-delay: 0.16s; border-top-color: var(--text-faint); }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kpi-card { animation: none; opacity: 1; transform: none; }
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-size: 42px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .kpi-sub {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- Panels ---------- */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 22px 22px;
+  }
+
+  .panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 4px;
+  }
+
+  .panel-caption {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-bottom: 16px;
+  }
+
+  /* Facility scoreboard */
+  .dock-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .dock-row:last-child { border-bottom: none; }
+
+  .dock-light {
+    width: 9px;
+    height: 9px;
+    border-radius: 1px;
+    background: var(--accent);
+    flex-shrink: 0;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .dock-light { animation: none; } }
+
+  .dock-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    width: 62px;
+    flex-shrink: 0;
+  }
+
+  .dock-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .dock-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .dock-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Channel table */
+  .chan-table { width: 100%; border-collapse: collapse; }
+  .chan-table tbody tr { border-bottom: 1px solid var(--line); }
+  .chan-table tbody tr:last-child { border-bottom: none; }
+  .chan-table td { padding: 8px 4px; font-size: 12.5px; vertical-align: middle; }
+  .chan-name { color: var(--text); width: 42%; }
+  .chan-bar-td { width: 38%; }
+  .chan-bar-track { height: 5px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+  .chan-bar-fill { height: 100%; background: var(--text-dim); border-radius: 2px; width: 0%; transition: width 0.6s ease; }
+  .chan-count { font-family: 'IBM Plex Mono', monospace; text-align: right; color: var(--text-dim); width: 20%; }
+
+  .scroll-area { max-height: 340px; overflow-y: auto; }
+  .scroll-area::-webkit-scrollbar { width: 6px; }
+  .scroll-area::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+  /* Matrix table */
+  .matrix-table { width: 100%; border-collapse: collapse; }
+  .matrix-table th {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    padding: 0 10px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .matrix-table th:first-child { text-align: left; }
+  .matrix-table td {
+    padding: 9px 10px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+  }
+  .matrix-table td:first-child {
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+  }
+  .matrix-table tr.total-row td {
+    color: var(--text);
+    font-weight: 600;
+    border-top: 1px solid var(--text-faint);
+    border-bottom: none;
+  }
+  .matrix-table td.total-col { color: var(--accent); }
+
+  /* Footer / states */
+  .footer-note {
+    margin-top: 24px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    line-height: 1.6;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+
+  .state-box {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .state-box.error { border-color: #6b2d2d; color: #e08a8a; }
+  .state-box code {
+    display: block;
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-faint);
+    word-break: break-all;
+  }
+
+  @media (max-width: 860px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    h1.display { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <div class="eyebrow">Mosaic Wellness · Warehousing &amp; Logistics</div>
+      <h1 class="display">Invoice Dispatch Count</h1>
+      <div class="scope-note" id="scopeNote">Loading scope…</div>
+    </div>
+    <div class="status-block">
+      <div class="status-row">
+        <span class="live-dot"></span>
+        <span class="updated-label">Last refreshed</span>
+      </div>
+      <div id="lastUpdated" class="mono">—</div>
+      <button class="refresh-btn" id="refreshBtn">Refresh now</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="state-box" id="loadingBox">Reading current invoice export…</div>
+  </div>
+
+  <div class="footer-note">
+    Counts one row per Invoice No, first qualifying occurrence only. Facility-level and
+    the channel × facility breakdown are restricted to SL MM, SL LJ and SL BW.
+    Data source: Google Sheet fed from the Unicommerce "Export Job Complete – Invoice" export.
+  </div>
+
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const contentEl = document.getElementById('content');
+  const lastUpdatedEl = document.getElementById('lastUpdated');
+  const scopeNoteEl = document.getElementById('scopeNote');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  function buildUrl() {
+    if (!APPS_SCRIPT_API_KEY) return APPS_SCRIPT_URL;
+    const sep = APPS_SCRIPT_URL.indexOf('?') === -1 ? '?' : '&';
+    return APPS_SCRIPT_URL + sep + 'key=' + encodeURIComponent(APPS_SCRIPT_API_KEY);
+  }
+
+  function fmt(n) {
+    return new Intl.NumberFormat('en-IN').format(n);
+  }
+
+  function renderLoading() {
+    contentEl.innerHTML = '<div class="state-box" id="loadingBox">Reading current invoice export…</div>';
+  }
+
+  function renderError(message, url) {
+    contentEl.innerHTML =
+      '<div class="state-box error">' +
+      'Could not load dashboard data.<br>' + escapeHtml(message) +
+      '<code>' + escapeHtml(url) + '</code>' +
+      '</div>';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function render(data) {
+    const maxChannel = Math.max.apply(null, data.channelSummary.map(function (c) { return c.count; }));
+    const maxFacility = Math.max.apply(null, data.facilitySummary.map(function (f) { return f.count; }));
+
+    scopeNoteEl.textContent =
+      'Statuses counted: ' + data.allowedStatuses.join(', ') + '.';
+
+    lastUpdatedEl.textContent = new Date(data.generatedAt).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+
+    const kpiHtml =
+      '<div class="kpi-row">' +
+        '<div class="kpi-card">' +
+          '<div class="kpi-label">Unique Invoices · Channel Level</div>' +
+          '<div class="kpi-value mono">' + fmt(data.kpi.channelLevelUniqueInvoices) + '</div>' +
+          '<div class="kpi-sub">Across all channels, all facilities</div>' +
+        '</div>' +
+        '<div class="kpi-card">' +
+          '<div class="kpi-label">Unique Invoices · Facility Level</div>' +
+          '<div class="kpi-value mono">' + fmt(data.kpi.facilityLevelUniqueInvoices) + '</div>' +
+          '<div class="kpi-sub">SL MM + SL LJ + SL BW only</div>' +
+        '</div>' +
+        '<div class="kpi-card">' +
+          '<div class="kpi-label">Raw Rows Processed</div>' +
+          '<div class="kpi-value mono">' + fmt(data.rawRowCount) + '</div>' +
+          '<div class="kpi-sub">Line items in current export</div>' +
+        '</div>' +
+      '</div>';
+
+    const dockRows = data.facilitySummary.map(function (f) {
+      const pct = maxFacility ? Math.round((f.count / maxFacility) * 100) : 0;
+      return (
+        '<div class="dock-row">' +
+          '<span class="dock-light"></span>' +
+          '<span class="dock-name">' + escapeHtml(f.facility) + '</span>' +
+          '<span class="dock-bar-track"><span class="dock-bar-fill" data-pct="' + pct + '"></span></span>' +
+          '<span class="dock-count mono">' + fmt(f.count) + '</span>' +
+        '</div>'
+      );
+    }).join('');
+
+    const channelRows = data.channelSummary.map(function (c) {
+      const pct = maxChannel ? Math.round((c.count / maxChannel) * 100) : 0;
+      return (
+        '<tr>' +
+          '<td class="chan-name">' + escapeHtml(c.channel) + '</td>' +
+          '<td class="chan-bar-td"><div class="chan-bar-track"><div class="chan-bar-fill" data-pct="' + pct + '"></div></div></td>' +
+          '<td class="chan-count">' + fmt(c.count) + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+
+    const fac = data.facilities;
+    const matrixHead =
+      '<tr><th>Channel</th>' + fac.map(function (f) { return '<th>' + escapeHtml(f) + '</th>'; }).join('') + '<th>Total</th></tr>';
+
+    const matrixRows = data.channelByFacility.map(function (row) {
+      return (
+        '<tr><td>' + escapeHtml(row.channel) + '</td>' +
+        fac.map(function (f) { return '<td>' + fmt(row[f]) + '</td>'; }).join('') +
+        '<td class="total-col">' + fmt(row.total) + '</td></tr>'
+      );
+    }).join('');
+
+    const matrixTotals = { total: 0 };
+    fac.forEach(function (f) { matrixTotals[f] = 0; });
+    data.channelByFacility.forEach(function (row) {
+      fac.forEach(function (f) { matrixTotals[f] += row[f]; });
+      matrixTotals.total += row.total;
+    });
+    const matrixTotalRow =
+      '<tr class="total-row"><td>Total</td>' +
+      fac.map(function (f) { return '<td>' + fmt(matrixTotals[f]) + '</td>'; }).join('') +
+      '<td class="total-col">' + fmt(matrixTotals.total) + '</td></tr>';
+
+    contentEl.innerHTML =
+      kpiHtml +
+      '<div class="grid-2">' +
+        '<div class="panel">' +
+          '<div class="panel-title">Facility Scoreboard</div>' +
+          '<div class="panel-caption">Dispatch-eligible invoices per facility</div>' +
+          dockRows +
+        '</div>' +
+        '<div class="panel">' +
+          '<div class="panel-title">Channel Breakdown</div>' +
+          '<div class="panel-caption">All facilities, sorted by volume</div>' +
+          '<div class="scroll-area"><table class="chan-table"><tbody>' + channelRows + '</tbody></table></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="panel">' +
+        '<div class="panel-title">Channel &times; Facility</div>' +
+        '<div class="panel-caption">SL MM / SL LJ / SL BW only</div>' +
+        '<table class="matrix-table"><thead>' + matrixHead + '</thead><tbody>' + matrixRows + matrixTotalRow + '</tbody></table>' +
+      '</div>';
+
+    // animate bar widths after paint
+    requestAnimationFrame(function () {
+      document.querySelectorAll('[data-pct]').forEach(function (el) {
+        el.style.width = el.getAttribute('data-pct') + '%';
+      });
+    });
+  }
+
+  function load() {
+    renderLoading();
+    const url = buildUrl();
+    fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.error) throw new Error(data.error);
+        render(data);
+      })
+      .catch(function (err) {
+        renderError(err.message || String(err), url);
+      });
+  }
+
+  refreshBtn.addEventListener('click', load);
+  load();
+
+  if (typeof REFRESH_INTERVAL_MS === 'number' && REFRESH_INTERVAL_MS > 0) {
+    setInterval(load, REFRESH_INTERVAL_MS);
+  }
+})();
+</script>
+</body>
+</html>
